@@ -80,6 +80,8 @@ function s.initial_effect(c)
 	c:RegisterEffect(e7)
 end
 
+s.listed_names = {36623431}  -- Iron Core of Koa'ki Meiru
+
 -- Special Summon Condition 
 -- Filtro para "Koa'ki Meiru" que pueden ser destruidos
 function s.desfilter(c,e)
