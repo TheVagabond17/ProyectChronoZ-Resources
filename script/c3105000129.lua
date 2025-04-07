@@ -65,13 +65,29 @@ end
 
 function s.retop(e,tp,eg,ep,ev,re,r,rp)
 	local tc=e:GetLabelObject()
-	local pos=tc:GetFlagEffectLabel(id)
 	if not tc then return end
-	Duel.ReturnToField(tc)
-	if pos==POS_FACEDOWN then
-		Duel.ChangePosition(tc,POS_FACEDOWN_DEFENSE)
+
+	local pos = tc:GetFlagEffectLabel(id) or POS_FACEUP
+	local p = tc:GetOwner()
+
+	if tc:IsType(TYPE_FIELD) then
+		-- Destruir Field Spell existente en la zona del jugador
+		local current_field=Duel.GetFieldCard(p,LOCATION_FZONE,0)
+		if current_field then
+			Duel.Destroy(current_field,REASON_RULE)
+		end
+		-- Mover la carta a la zona de campo (FZONE)
+		Duel.MoveToField(tc,p,p,LOCATION_FZONE,pos,true)
+	else
+		-- Verificamos espacio en zona de hechizos/trampas si no es Field Spell
+		if Duel.GetLocationCount(p,LOCATION_SZONE)<=0 then return end
+		Duel.ReturnToField(tc)
+		if pos==POS_FACEDOWN then
+			Duel.ChangePosition(tc,POS_FACEDOWN_DEFENSE)
+		end
 	end
 end
+
 
 -- Efecto 2: Verificar si fue Invocado de Modo Especial desde el Destierro y no controlas "Dimensional Fissure"
 function s.thcon(e,tp,eg,ep,ev,re,r,rp)
