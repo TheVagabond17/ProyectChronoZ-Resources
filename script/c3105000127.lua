@@ -23,27 +23,16 @@ function s.initial_effect(c)
 	e2:SetOperation(s.checkop)
 	c:RegisterEffect(e2)
 
-	-- Si controlas 3+ monstruos en Posición de Ataque, tu oponente no puede declarar ataques
+	-- Una vez por turno: puedes desterrar 1 monstruo que controlas
 	local e3=Effect.CreateEffect(c)
-	e3:SetType(EFFECT_TYPE_FIELD)
-	e3:SetCode(EFFECT_CANNOT_ATTACK)
+	e3:SetDescription(aux.Stringid(id,1))
+	e3:SetCategory(CATEGORY_REMOVE)
+	e3:SetType(EFFECT_TYPE_IGNITION)
 	e3:SetRange(LOCATION_SZONE)
-	e3:SetTargetRange(0,LOCATION_MZONE)
-	e3:SetCondition(s.atklimcon)
+	e3:SetCountLimit(1)
+	e3:SetTarget(s.rmtg)
+	e3:SetOperation(s.rmop)
 	c:RegisterEffect(e3)
-
-	-- (Efecto Rápido) Si un monstruo es desterrado: puedes desterrar 1 carta en el Campo
-	local e4=Effect.CreateEffect(c)
-	e4:SetDescription(aux.Stringid(id,1))
-	e4:SetCategory(CATEGORY_REMOVE)
-	e4:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
-	e4:SetCode(EVENT_REMOVE)
-	e4:SetRange(LOCATION_SZONE)
-	e4:SetProperty(EFFECT_FLAG_DELAY)
-	e4:SetCountLimit(1)
-	e4:SetTarget(s.rmtg)
-	e4:SetOperation(s.rmop)
-	c:RegisterEffect(e4)
 end
 
 -- Lista de cartas "D.D." (añade aquí más si es necesario)
@@ -78,7 +67,6 @@ function s.thop(e,tp,eg,ep,ev,re,r,rp)
 	end
 end
 
-
 -- Efecto de autodestrucción si controlas monstruo que no sea D.D.
 function s.checkop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
@@ -88,22 +76,15 @@ function s.checkop(e,tp,eg,ep,ev,re,r,rp)
 	end
 end
 
--- Condición: controlas 3+ monstruos en Posición de Ataque
-function s.atklimcon(e)
-	return Duel.GetMatchingGroupCount(Card.IsPosition,e:GetHandlerPlayer(),LOCATION_MZONE,0,nil,POS_FACEUP_ATTACK)>=3
-end
-
--- Efecto Rápido: si un monstruo es desterrado, puedes desterrar 1 carta en el Campo
+-- Efecto Ignition: desterrar 1 monstruo que controlas
 function s.rmtg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return eg:IsExists(Card.IsType,1,nil,TYPE_MONSTER)
-		and Duel.IsExistingMatchingCard(Card.IsAbleToRemove,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,nil) end
-	Duel.SetOperationInfo(0,CATEGORY_REMOVE,nil,1,0,LOCATION_ONFIELD)
+	if chk==0 then return Duel.IsExistingMatchingCard(Card.IsAbleToRemove,tp,LOCATION_MZONE,0,1,nil) end
+	Duel.SetOperationInfo(0,CATEGORY_REMOVE,nil,1,tp,LOCATION_MZONE)
 end
 function s.rmop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
-	local g=Duel.SelectMatchingCard(tp,Card.IsAbleToRemove,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,1,nil)
+	local g=Duel.SelectMatchingCard(tp,Card.IsAbleToRemove,tp,LOCATION_MZONE,0,1,1,nil)
 	if #g>0 then
 		Duel.Remove(g,POS_FACEUP,REASON_EFFECT)
 	end
 end
-
