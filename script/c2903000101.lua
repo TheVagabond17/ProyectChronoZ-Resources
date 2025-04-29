@@ -16,6 +16,8 @@ function s.initial_effect(c)
 	c:RegisterEffect(e1)
 end
 
+s.listed_names={CARD_DARK_MAGICIAN}
+
 function s.costfilter(c)
 	return (c:IsCode(46986414) or (c:IsRace(RACE_SPELLCASTER) and c:IsLevelBelow(6))) and c:IsAbleToGraveAsCost()
 end
