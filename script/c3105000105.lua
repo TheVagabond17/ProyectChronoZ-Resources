@@ -1,7 +1,7 @@
 -- Alien Scout
 local s,id=GetID()
 function s.initial_effect(c)
-	-- Add 1 Spell/Trap that mentions "A-Counter" when Summoned
+	-- Add "Alien Invasion" when Summoned
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH)
@@ -32,14 +32,16 @@ end
 
 s.counter_list={COUNTER_A}
 
--- Search Spell/Trap that mentions "A-Counter"
+-- Search specifically "Alien Invasion"
 function s.thfilter(c)
-	return c:IsSpellTrap() and c:IsCode(02561846,53291093,73262676,91231901,34541863,64163367,99342953,3105000103,20985997,39163598,57384901,84491298,21768554,59258334) and c:IsAbleToHand()
+	return c:IsCode(3105000103) and c:IsAbleToHand()
 end
+
 function s.thtg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(s.thfilter,tp,LOCATION_DECK,0,1,nil) end
 	Duel.SetOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_DECK)
 end
+
 function s.thop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
 	local g=Duel.SelectMatchingCard(tp,s.thfilter,tp,LOCATION_DECK,0,1,1,nil)
@@ -65,10 +67,10 @@ function s.actg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	Duel.SelectTarget(tp,Card.IsFaceup,tp,0,LOCATION_MZONE,1,1,nil)
 	Duel.SetOperationInfo(0,CATEGORY_COUNTER,nil,1,0,0)
 end
+
 function s.acop(e,tp,eg,ep,ev,re,r,rp)
 	local tc=Duel.GetFirstTarget()
 	if tc and tc:IsFaceup() and tc:IsRelateToEffect(e) then
 		tc:AddCounter(COUNTER_A,1)
 	end
 end
-
