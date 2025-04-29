@@ -25,7 +25,7 @@ function s.rmfilter1(c,tp)
 end
 
 function s.rmfilter2(c)
-	return c:IsFaceup() 
+	return c:IsMonster()
 end
 
 function s.target(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
