@@ -21,6 +21,19 @@ function s.initial_effect(c)
 	e2:SetTarget(s.rthtg)
 	e2:SetOperation(s.rthop)
 	c:RegisterEffect(e2)
+	--atk def
+	local e3=Effect.CreateEffect(c)
+	e3:SetType(EFFECT_TYPE_FIELD)
+	e3:SetCode(EFFECT_UPDATE_ATTACK)
+	e3:SetRange(LOCATION_MZONE)
+	e3:SetTargetRange(LOCATION_MZONE,LOCATION_MZONE)
+	e3:SetCondition(s.adcon)
+	e3:SetTarget(s.adtg)
+	e3:SetValue(s.adval)
+	c:RegisterEffect(e3)
+	local e4=e3:Clone()
+	e4:SetCode(EFFECT_UPDATE_DEFENSE)
+	c:RegisterEffect(e4)
 end
 
 -- List of card codes that place or use A-Counters
@@ -89,6 +102,17 @@ function s.rthop(e,tp,eg,ep,ev,re,r,rp)
 	if c:IsRelateToEffect(e) then
 		Duel.SendtoHand(c,nil,REASON_EFFECT)
 	end
+end
+
+function s.adcon(e)
+	return Duel.IsPhase(PHASE_DAMAGE_CAL) and Duel.GetAttackTarget()
+end
+function s.adtg(e,c)
+	local bc=c:GetBattleTarget()
+	return bc and c:GetCounter(COUNTER_A)~=0 and bc:IsSetCard(SET_ALIEN)
+end
+function s.adval(e,c)
+	return c:GetCounter(COUNTER_A)*-300
 end
 
 
