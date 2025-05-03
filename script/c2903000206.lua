@@ -5,8 +5,7 @@ s.listed_names={CARD_BLUEEYES_W_DRAGON}
 function s.initial_effect(c)
 	-- Fusion Summon
 	c:EnableReviveLimit()
-	Fusion.AddProcMixN(c,true,true,CARD_BLUEEYES_W_DRAGON,3,aux.FilterBoolFunctionEx(Card.IsSetCard,SET_BLUE_EYES),2)
-
+	Fusion.AddProcMixN(c,true,true,CARD_BLUEEYES_W_DRAGON,5)
 	-- Must be Fusion Summoned
 	local e1=Effect.CreateEffect(c)
 	e1:SetType(EFFECT_TYPE_SINGLE)
