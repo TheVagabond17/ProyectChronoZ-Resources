@@ -1,99 +1,120 @@
---Arcana Illusion Joker
+--Shin Buster Dragon
 local s,id=GetID()
 function s.initial_effect(c)
+	-- Condición de Invocación de Fusión
+	Fusion.AddProcMix(c,true,true,s.ffilter1,s.ffilter2)
 	c:EnableReviveLimit()
-	Fusion.AddProcMixN(c,true,true,s.fusfilter,3)
 
-	-- During Battle Phase: Gain 1300 ATK + opponent can't activate effects
+	-- Cambiar el Tipo a Dragón
 	local e1=Effect.CreateEffect(c)
-	e1:SetType(EFFECT_TYPE_SINGLE)
-	e1:SetCode(EFFECT_UPDATE_ATTACK)
-	e1:SetProperty(EFFECT_FLAG_SINGLE_RANGE)
+	e1:SetType(EFFECT_TYPE_FIELD)
+	e1:SetCode(EFFECT_CHANGE_RACE)
 	e1:SetRange(LOCATION_MZONE)
-	e1:SetCondition(function(e) return Duel.IsBattlePhase() end)
-	e1:SetValue(1300)
+	e1:SetTargetRange(0,LOCATION_MZONE)
+	e1:SetValue(RACE_DRAGON)
 	c:RegisterEffect(e1)
 
+	-- Invocar Especialmente un "Buster Blader" desde el Cementerio
 	local e2=Effect.CreateEffect(c)
-	e2:SetType(EFFECT_TYPE_FIELD)
-	e2:SetCode(EFFECT_CANNOT_ACTIVATE)
+	e2:SetCategory(CATEGORY_SPECIAL_SUMMON)
+	e2:SetType(EFFECT_TYPE_IGNITION)
 	e2:SetRange(LOCATION_MZONE)
-	e2:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
-	e2:SetTargetRange(0,1)
-	e2:SetCondition(function(e) return Duel.IsBattlePhase() end)
-	e2:SetValue(function(e,re,tp) return true end)
+	e2:SetProperty(EFFECT_FLAG_CARD_TARGET)
+	e2:SetCountLimit(1)
+	e2:SetCondition(s.spcon)
+	e2:SetTarget(s.sptg)
+	e2:SetOperation(s.spop)
 	c:RegisterEffect(e2)
 
-	-- Quick Effect: Bounce 1 your monster + 1 opponent card
+	-- Equipar un "Destruction Sword" desde el Cementerio
 	local e3=Effect.CreateEffect(c)
-	e3:SetDescription(aux.Stringid(id,0))
-	e3:SetCategory(CATEGORY_TOHAND)
 	e3:SetType(EFFECT_TYPE_QUICK_O)
+	e3:SetCategory(CATEGORY_EQUIP)
 	e3:SetCode(EVENT_FREE_CHAIN)
+	e3:SetHintTiming(0,TIMING_END_PHASE)
 	e3:SetProperty(EFFECT_FLAG_CARD_TARGET)
+	e3:SetCountLimit(1)
 	e3:SetRange(LOCATION_MZONE)
-	e3:SetCountLimit(1,id)
-	e3:SetTarget(s.bouncetg)
-	e3:SetOperation(s.bounceop)
+	e3:SetCondition(s.condition)
+	e3:SetTarget(s.eqtg)
+	e3:SetOperation(s.eqop)
 	c:RegisterEffect(e3)
-
-	-- GY Effect: Shuffle Q/K/J Knight(s) and draw
-	local e4=Effect.CreateEffect(c)
-	e4:SetDescription(aux.Stringid(id,1))
-	e4:SetCategory(CATEGORY_TODECK+CATEGORY_DRAW)
-	e4:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
-	e4:SetProperty(EFFECT_FLAG_DELAY)
-	e4:SetCode(EVENT_TO_GRAVE)
-	e4:SetCountLimit(1,{id,1})
-	e4:SetTarget(s.drawtg)
-	e4:SetOperation(s.drawop)
-	c:RegisterEffect(e4)
-end
-s.listed_names={CARD_JACK_KNIGHT,CARD_KING_KNIGHT,CARD_QUEEN_KNIGHT}
--- Fusión: 3 Guerreros con nombres distintos
-function s.fusfilter(c,fc,sumtype,tp)
-	return c:IsRace(RACE_WARRIOR)
 end
 
--- Rebote (Bounce)
-function s.bouncetg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-	if chkc then return chkc:IsOnField() and chkc:IsControler(tp) end
-	if chk==0 then
-		return Duel.IsExistingTarget(aux.TRUE,tp,LOCATION_MZONE,0,1,nil)
-			and Duel.IsExistingTarget(aux.TRUE,tp,0,LOCATION_ONFIELD,1,nil)
-	end
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_RTOHAND)
-	local g1=Duel.SelectTarget(tp,aux.TRUE,tp,LOCATION_MZONE,0,1,1,nil)
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_RTOHAND)
-	local g2=Duel.SelectTarget(tp,aux.TRUE,tp,0,LOCATION_ONFIELD,1,1,nil)
+s.listed_names={78193831} -- ID de "Buster Blader"
+s.listed_series={0xd7,0xd6} -- Series "Destruction Sword" y "Buster Blader"
+
+-- Filtros para los materiales de fusión
+function s.ffilter1(c)
+	return c:IsSetCard(0xd6) and c:IsRace(RACE_DRAGON)
 end
-function s.bounceop(e,tp,eg,ep,ev,re,r,rp)
-	local g=Duel.GetChainInfo(0,CHAININFO_TARGET_CARDS):Filter(Card.IsRelateToEffect,nil,e)
-	if #g==2 then
-		Duel.SendtoHand(g,nil,REASON_EFFECT)
+function s.ffilter2(c)
+	return c:IsSetCard(0xd6)
+end
+
+-- Condición para el efecto de Invocación Especial
+function s.spcon(e,tp,eg,ep,ev,re,r,rp)
+	return not Duel.IsExistingMatchingCard(aux.FaceupFilter(Card.IsSetCard,0xd7),tp,LOCATION_MZONE,0,1,nil)
+end
+
+-- Objetivo y Operación para Invocar Especialmente un "Buster Blader"
+function s.spfilter(c,e,tp)
+	return c:IsCode(78193831) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
+end
+function s.sptg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
+	if chkc then return chkc:IsLocation(LOCATION_GRAVE) and chkc:IsControler(tp) and s.spfilter(chkc,e,tp) end
+	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0
+		and Duel.IsExistingTarget(s.spfilter,tp,LOCATION_GRAVE,0,1,nil,e,tp) end
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
+	local g=Duel.SelectTarget(tp,s.spfilter,tp,LOCATION_GRAVE,0,1,1,nil,e,tp)
+	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,g,1,0,0)
+end
+function s.spop(e,tp,eg,ep,ev,re,r,rp)
+	local tc=Duel.GetFirstTarget()
+	if tc:IsRelateToEffect(e) then
+		Duel.SpecialSummon(tc,0,tp,tp,false,false,POS_FACEUP)
 	end
 end
 
--- Efecto de robar al ir al Cementerio
-function s.drawfilter(c)
-	return c:IsAbleToDeck() and (c:IsCode(90876561) or c:IsCode(64788463) or c:IsCode(25652259)) -- Jack, King, Queen
+-- Condición para el efecto de Equipar (una vez por turno del oponente)
+function s.condition(e,tp,eg,ep,ev,re,r,rp)
+	return Duel.GetTurnPlayer()~=tp
 end
-function s.drawtg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then
-		return Duel.IsExistingMatchingCard(s.drawfilter,tp,LOCATION_HAND+LOCATION_MZONE+LOCATION_GRAVE,0,1,nil)
+
+-- Objetivo y Operación para Equipar un "Destruction Sword"
+function s.cfilter(c)
+	return c:IsSetCard(0xd7) and c:IsFaceup()
+end
+function s.eqfilter(c)
+	return c:IsSetCard(0xd6) and c:IsMonster() and not c:IsForbidden()
+end
+function s.eqtg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
+	if chkc then return chkc:IsControler(tp) and chkc:IsLocation(LOCATION_MZONE) and s.cfilter(chkc) end
+	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_SZONE)>0
+		and Duel.IsExistingTarget(s.cfilter,tp,LOCATION_MZONE,0,1,nil)
+		and Duel.IsExistingMatchingCard(s.eqfilter,tp,LOCATION_GRAVE,0,1,nil) end
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_FACEUP)
+	Duel.SelectTarget(tp,s.cfilter,tp,LOCATION_MZONE,0,1,1,nil)
+	Duel.SetOperationInfo(0,CATEGORY_LEAVE_GRAVE,nil,1,tp,LOCATION_GRAVE)
+end
+function s.eqop(e,tp,eg,ep,ev,re,r,rp)
+	local tc=Duel.GetFirstTarget()
+	if Duel.GetLocationCount(tp,LOCATION_SZONE)<=0 then return end
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_EQUIP)
+	local sg=Duel.SelectMatchingCard(tp,s.eqfilter,tp,LOCATION_GRAVE,0,1,1,nil)
+	local sc=sg:GetFirst()
+	if sc then
+		if not Duel.Equip(tp,sc,tc,true) then return end
+		local e1=Effect.CreateEffect(e:GetHandler())
+		e1:SetType(EFFECT_TYPE_SINGLE)
+		e1:SetCode(EFFECT_EQUIP_LIMIT)
+		e1:SetReset(RESET_EVENT+RESETS_STANDARD)
+		e1:SetValue(s.eqlimit)
+		e1:SetLabelObject(tc)
+		sc:RegisterEffect(e1)
 	end
-	Duel.SetOperationInfo(0,CATEGORY_TODECK,nil,1,tp,LOCATION_HAND+LOCATION_MZONE+LOCATION_GRAVE)
-	Duel.SetOperationInfo(0,CATEGORY_DRAW,nil,0,tp,1)
 end
-function s.drawop(e,tp,eg,ep,ev,re,r,rp)
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TODECK)
-	local g=Duel.SelectMatchingCard(tp,s.drawfilter,tp,LOCATION_HAND+LOCATION_MZONE+LOCATION_GRAVE,0,1,63,nil)
-	if #g>0 then
-		Duel.SendtoDeck(g,nil,SEQ_DECKSHUFFLE,REASON_EFFECT)
-		local ct=g:Filter(Card.IsLocation,nil,LOCATION_DECK+LOCATION_EXTRA):GetCount()
-		if ct>0 then
-			Duel.BreakEffect()
-			Duel.Draw(tp,ct,REASON_EFFECT)
-		end
-	end
+function s.eqlimit(e,c)
+	return e:GetLabelObject()==c
 end
+
