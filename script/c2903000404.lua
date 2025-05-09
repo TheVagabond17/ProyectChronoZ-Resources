@@ -49,7 +49,7 @@ function s.ffilter1(c)
 	return c:IsSetCard(0xd6) and c:IsRace(RACE_DRAGON)
 end
 function s.ffilter2(c)
-	return c:IsSetCard(0xd6)
+	return c:IsRace(RACE_DRAGON)
 end
 
 -- Condición para el efecto de Invocación Especial
