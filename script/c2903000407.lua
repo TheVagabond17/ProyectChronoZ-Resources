@@ -2,6 +2,10 @@
 local s,id=GetID()
 function s.initial_effect(c)
 	c:EnableReviveLimit()
+	
+	-- Only 1 control restriction
+	c:SetUniqueOnField(1,0,id)
+
 	-- Cannot be Normal Summoned/Set
 	local e0=Effect.CreateEffect(c)
 	e0:SetType(EFFECT_TYPE_SINGLE)
@@ -33,14 +37,14 @@ function s.initial_effect(c)
 	e2:SetOperation(s.thop)
 	c:RegisterEffect(e2)
 
-	-- Give piercing to a "Gaia the Dragon Champion"
+	-- Make a face-up monster become Dragon-Type
 	local e3=Effect.CreateEffect(c)
 	e3:SetDescription(aux.Stringid(id,2))
 	e3:SetType(EFFECT_TYPE_IGNITION)
 	e3:SetRange(LOCATION_MZONE)
 	e3:SetCountLimit(1,{id,1})
-	e3:SetTarget(s.pctg)
-	e3:SetOperation(s.pcop)
+	e3:SetTarget(s.drtg)
+	e3:SetOperation(s.drop)
 	c:RegisterEffect(e3)
 end
 
@@ -78,21 +82,19 @@ function s.thop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.ConfirmCards(1-tp,g1)
 end
 
--- Give piercing to a Gaia the Dragon Champion
-function s.pctg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-	if chk==0 then return Duel.IsExistingTarget(s.pcfilter,tp,LOCATION_MZONE,0,1,nil) end
+-- Change monster to Dragon-Type
+function s.drtg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
+	if chk==0 then return Duel.IsExistingTarget(aux.TRUE,tp,LOCATION_MZONE,0,1,nil) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_FACEUP)
-	Duel.SelectTarget(tp,s.pcfilter,tp,LOCATION_MZONE,0,1,1,nil)
+	Duel.SelectTarget(tp,aux.TRUE,tp,LOCATION_MZONE,0,1,1,nil)
 end
-function s.pcfilter(c)
-	return c:IsFaceup() and c:IsCode(66889139) -- Gaia the Dragon Champion
-end
-function s.pcop(e,tp,eg,ep,ev,re,r,rp)
+function s.drop(e,tp,eg,ep,ev,re,r,rp)
 	local tc=Duel.GetFirstTarget()
 	if tc:IsRelateToEffect(e) and tc:IsFaceup() then
 		local e1=Effect.CreateEffect(e:GetHandler())
 		e1:SetType(EFFECT_TYPE_SINGLE)
-		e1:SetCode(EFFECT_PIERCE)
+		e1:SetCode(EFFECT_CHANGE_RACE)
+		e1:SetValue(RACE_DRAGON)
 		e1:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
 		tc:RegisterEffect(e1)
 	end
