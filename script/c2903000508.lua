@@ -41,10 +41,10 @@ s.listed_series={0x64} -- "Harpie"
 
 -- Quick Effect: Return 2 "Harpie" + 1 opponent monster to hand
 function s.thfilter1(c)
-	return c:IsFaceup() and c:IsSetCard(0x64) and c:IsAbleToHand()
+	return c:IsFaceup() and c:IsSetCard(0x64) and c:IsAbleToHand() and c:IsType(TYPE_MONSTER)
 end
 function s.thfilter2(c)
-	return c:IsSetCard(0x64) and c:IsAbleToHand()
+	return c:IsSetCard(0x64) and c:IsAbleToHand() and c:IsType(TYPE_MONSTER)
 end
 function s.thfilter_opponent(c)
 	return c:IsAbleToHand()
