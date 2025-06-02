@@ -22,10 +22,10 @@ function s.initial_effect(c)
 	e1:SetValue(s.efilter)
 	c:RegisterEffect(e1)
 
-	-- Can attack up to 3 times
+	-- Can attack up to 3 times, but only monsters
 	local e2=Effect.CreateEffect(c)
 	e2:SetType(EFFECT_TYPE_SINGLE)
-	e2:SetCode(EFFECT_EXTRA_ATTACK)
+	e2:SetCode(EFFECT_EXTRA_ATTACK_MONSTER)
 	e2:SetValue(2)
 	c:RegisterEffect(e2)
 
@@ -80,4 +80,5 @@ end
 function s.atkval(e,c)
 	return Duel.GetMatchingGroupCount(s.atkfilter,c:GetControler(),LOCATION_MZONE+LOCATION_GRAVE,LOCATION_MZONE+LOCATION_GRAVE,nil)*200
 end
+
 

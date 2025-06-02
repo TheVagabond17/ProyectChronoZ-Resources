@@ -1,56 +1,51 @@
---Harpie Lady Chimera
+--Harpie Phantom Gryphon
 local s,id=GetID()
 function s.initial_effect(c)
 	c:EnableReviveLimit()
 	Fusion.AddProcMix(c,true,true,CARD_HARPIE_LADY,aux.FilterBoolFunction(Card.IsSetCard,0x64))
 
-	-- Protección si hay Harpie Lady en el GY
+	-- Indestructible por efectos del oponente si "Harpie Lady" está en el GY
 	local e1=Effect.CreateEffect(c)
 	e1:SetType(EFFECT_TYPE_SINGLE)
 	e1:SetProperty(EFFECT_FLAG_SINGLE_RANGE)
 	e1:SetRange(LOCATION_MZONE)
-	e1:SetCode(EFFECT_CANNOT_BE_EFFECT_TARGET)
+	e1:SetCode(EFFECT_INDESTRUCTABLE_EFFECT)
 	e1:SetCondition(s.imcon)
-	e1:SetValue(aux.tgoval)
+	e1:SetValue(s.efilter)
 	c:RegisterEffect(e1)
 
-	local e2=e1:Clone()
-	e2:SetCode(EFFECT_INDESTRUCTABLE_EFFECT)
-	e2:SetValue(s.efilter)
+	-- Reducción de ATK
+	local e2=Effect.CreateEffect(c)
+	e2:SetType(EFFECT_TYPE_FIELD)
+	e2:SetCode(EFFECT_UPDATE_ATTACK)
+	e2:SetRange(LOCATION_MZONE)
+	e2:SetTargetRange(0,LOCATION_MZONE)
+	e2:SetValue(s.atkdefval)
 	c:RegisterEffect(e2)
 
-	-- Reducción ATK/DEF oponente
-	local e3=Effect.CreateEffect(c)
-	e3:SetType(EFFECT_TYPE_FIELD)
-	e3:SetCode(EFFECT_UPDATE_ATTACK)
-	e3:SetRange(LOCATION_MZONE)
-	e3:SetTargetRange(0,LOCATION_MZONE)
-	e3:SetValue(s.atkdefval)
+	-- Reducción de DEF
+	local e3=e2:Clone()
+	e3:SetCode(EFFECT_UPDATE_DEFENSE)
 	c:RegisterEffect(e3)
 
-	local e4=e3:Clone()
-	e4:SetCode(EFFECT_UPDATE_DEFENSE)
-	c:RegisterEffect(e4)
-
 	-- Quick Effect: destruir Spell/Trap
-	local e5=Effect.CreateEffect(c)
-	e5:SetDescription(aux.Stringid(id,0))
-	e5:SetCategory(CATEGORY_DESTROY)
-	e5:SetType(EFFECT_TYPE_QUICK_O)
-	e5:SetCode(EVENT_CHAINING)
-	e5:SetRange(LOCATION_MZONE)
-	e5:SetCountLimit(1)
-	e5:SetCondition(s.descon)
-	e5:SetCost(s.descost)
-	e5:SetTarget(s.destg)
-	e5:SetOperation(s.desop)
-	c:RegisterEffect(e5)
+	local e4=Effect.CreateEffect(c)
+	e4:SetDescription(aux.Stringid(id,0))
+	e4:SetCategory(CATEGORY_DESTROY)
+	e4:SetType(EFFECT_TYPE_QUICK_O)
+	e4:SetCode(EVENT_CHAINING)
+	e4:SetRange(LOCATION_MZONE)
+	e4:SetCountLimit(1)
+	e4:SetCondition(s.descon)
+	e4:SetCost(s.descost)
+	e4:SetTarget(s.destg)
+	e4:SetOperation(s.desop)
+	c:RegisterEffect(e4)
 end
-
 s.listed_names={CARD_HARPIE_LADY}
 s.listed_series={0x64} -- "Harpie"
 
--- Protección si "Harpie Lady" está en el GY
+-- Condición de protección: si hay Harpie Lady en tu GY
 function s.imcon(e)
 	return Duel.IsExistingMatchingCard(Card.IsCode,e:GetHandlerPlayer(),LOCATION_GRAVE,0,1,nil,CARD_HARPIE_LADY)
 end
@@ -58,21 +53,20 @@ function s.efilter(e,re,tp)
 	return tp~=e:GetHandlerPlayer()
 end
 
--- Reducción de ATK/DEF
+-- Reducción de ATK/DEF por cada Harpie Lady
 function s.harpiecount(tp)
-	return Duel.GetMatchingGroupCount(s.harpiefilter,tp,LOCATION_MZONE+LOCATION_GRAVE,0,nil)
-end
-function s.harpiefilter(c)
-	return c:IsCode(CARD_HARPIE_LADY)
+	return Duel.GetMatchingGroupCount(Card.IsCode,tp,LOCATION_MZONE+LOCATION_GRAVE,0,nil,CARD_HARPIE_LADY)
 end
 function s.atkdefval(e,c)
 	return -100*s.harpiecount(e:GetHandlerPlayer())
 end
 
--- Quick Effect - destruir Spell/Trap
+-- Quick Effect - Condición
 function s.descon(e,tp,eg,ep,ev,re,r,rp)
 	return re~=nil
 end
+
+-- Costo: desterrar 2 Harpie Lady del campo o GY
 function s.cfilter(c)
 	return c:IsCode(CARD_HARPIE_LADY) and c:IsAbleToRemoveAsCost()
 end
@@ -84,15 +78,25 @@ function s.descost(e,tp,eg,ep,ev,re,r,rp,chk)
 	local g=Duel.SelectMatchingCard(tp,s.cfilter,tp,LOCATION_ONFIELD+LOCATION_GRAVE,0,2,2,nil)
 	Duel.Remove(g,POS_FACEUP,REASON_COST)
 end
+
+-- Objetivo: 1 Spell/Trap en el campo
+function s.spelltrapfilter(c)
+	return c:IsSpellTrap()
+end
 function s.destg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-	if chk==0 then return Duel.IsExistingMatchingCard(aux.TRUE,tp,0,LOCATION_SZONE,1,nil) end
+	if chk==0 then
+		return Duel.IsExistingMatchingCard(s.spelltrapfilter,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,nil)
+	end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_DESTROY)
-	local g=Duel.SelectTarget(tp,aux.TRUE,tp,0,LOCATION_SZONE,1,1,nil)
+	local g=Duel.SelectTarget(tp,s.spelltrapfilter,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,1,nil)
 	Duel.SetOperationInfo(0,CATEGORY_DESTROY,g,1,0,0)
 end
+
+-- Destruir el objetivo
 function s.desop(e,tp,eg,ep,ev,re,r,rp)
 	local tc=Duel.GetFirstTarget()
 	if tc and tc:IsRelateToEffect(e) then
 		Duel.Destroy(tc,REASON_EFFECT)
 	end
 end
+
