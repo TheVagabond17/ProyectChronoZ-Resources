@@ -39,7 +39,7 @@ function s.initial_effect(c)
 	c:RegisterEffect(e3)
 end
 
-s.listed_names={34460851,45231177,6172122} -- Flame Manipulator, Flame Swordsman, Red-Eyes Fusion
+s.listed_names={34460851,45231177,2903000301} -- Flame Manipulator, Flame Swordsman, Red-Eyes Flame Fusion
 s.listed_series={0x3b} -- Red-Eyes
 
 -- FIRE Warrior condition
@@ -57,7 +57,7 @@ function s.sptg(e,tp,eg,ep,ev,re,r,rp,chk)
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,e:GetHandler(),1,0,0)
 end
 function s.reffilter(c)
-	return c:IsCode(6172122) and c:IsAbleToHand() -- Red-Eyes Fusion
+	return c:IsCode(2903000301) and c:IsAbleToHand() -- Red-Eyes Flame Fusion
 end
 function s.spop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()

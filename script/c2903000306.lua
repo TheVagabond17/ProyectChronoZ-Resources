@@ -41,7 +41,7 @@ function s.initial_effect(c)
 end
 
 -- Lista de cartas relacionadas
-s.listed_names={6172122,45231177,34460851} -- Red-Eyes Fusion, Flame Swordsman, Flame Manipulator
+s.listed_names={2903000301,45231177,34460851} -- Red-Eyes Flame Fusion, Flame Swordsman, Flame Manipulator
 
 -- FIRE Warrior control
 function s.cfilter(c)
@@ -59,9 +59,9 @@ function s.sptg(e,tp,eg,ep,ev,re,r,rp,chk)
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,c,1,0,0)
 end
 
--- Red-Eyes Fusion search
+-- Red-Eyes Flame Fusion search
 function s.thfilter(c)
-	return c:IsCode(6172122) and c:IsAbleToHand()
+	return c:IsCode(2903000301) and c:IsAbleToHand()
 end
 
 function s.spop(e,tp,eg,ep,ev,re,r,rp)

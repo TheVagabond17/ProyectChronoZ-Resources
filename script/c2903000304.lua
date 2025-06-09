@@ -2,7 +2,13 @@
 local s,id=GetID()
 function s.initial_effect(c)
 	c:EnableReviveLimit()
-	Fusion.AddProcMix(c,true,true,CARD_REDEYES_B_DRAGON,aux.FilterBoolFunction(function(c) return c:IsRace(RACE_WARRIOR) and c:IsAttribute(ATTRIBUTE_FIRE) end))
+	-- Ruta 1: Red-Eyes + Flame Swordsman
+	local f1=Fusion.AddProcMix(c,true,true,CARD_REDEYES_B_DRAGON,45231177)[1]
+	f1:SetDescription(aux.Stringid(id,2))
+	-- Ruta 2: Red-Eyes + 2 Guerreros de FUEGO
+	local f2=Fusion.AddProcMixN(c,true,true,CARD_REDEYES_B_DRAGON,1,(aux.FilterBoolFunctionEx(Card.IsRace,RACE_WARRIOR) and aux.FilterBoolFunctionEx(Card.IsAttribute,ATTRIBUTE_FIRE)),2)[1]
+	f2:SetDescription(aux.Stringid(id,3))
+
 
 	-- Must first be Fusion Summoned
 	local e0=Effect.CreateEffect(c)
@@ -92,7 +98,7 @@ end
 
 function s.condition(e,tp,eg,ep,ev,re,r,rp)
 	local d=Duel.GetAttackTarget()
-	return d and d:IsControler(tp) and d:IsSetCard(0x3b)
+	return d and d:IsControler(tp) and d:IsSetCard(0x3b) or (d:IsRace(RACE_WARRIOR) and d:IsAttribute(ATTRIBUTE_FIRE))
 end
 
 function s.target(e,tp,eg,ep,ev,re,r,rp,chk)
