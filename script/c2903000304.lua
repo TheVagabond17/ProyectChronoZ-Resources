@@ -6,7 +6,7 @@ function s.initial_effect(c)
 	local f1=Fusion.AddProcMix(c,true,true,CARD_REDEYES_B_DRAGON,45231177)[1]
 	f1:SetDescription(aux.Stringid(id,2))
 	-- Ruta 2: Red-Eyes + 2 Guerreros de FUEGO
-	local f2=Fusion.AddProcMixN(c,true,true,CARD_REDEYES_B_DRAGON,1,(aux.FilterBoolFunctionEx(Card.IsRace,RACE_WARRIOR) and aux.FilterBoolFunctionEx(Card.IsAttribute,ATTRIBUTE_FIRE)),2)[1]
+	local f2=Fusion.AddProcMixN(c,true,true,CARD_REDEYES_B_DRAGON,1,s.matfilter,2)[1]
 	f2:SetDescription(aux.Stringid(id,3))
 
 
@@ -53,8 +53,12 @@ function s.initial_effect(c)
 	
 end
 
-s.listed_names={CARD_REDEYES_B_DRAGON}
+s.listed_names={CARD_REDEYES_B_DRAGON,45231177}
 s.material_setcode={0x3b}
+
+function s.matfilter(c,fc,sumtype,tp)
+	return c:IsAttribute(ATTRIBUTE_FIRE,fc,sumtype,tp) and c:IsRace(RACE_WARRIOR)
+end
 
 function s.splimit(e,se,sp,st)
 	return not e:GetHandler():IsLocation(LOCATION_EXTRA) or aux.fuslimit(e,se,sp,st)
