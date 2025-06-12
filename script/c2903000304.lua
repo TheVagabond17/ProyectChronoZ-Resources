@@ -5,7 +5,7 @@ function s.initial_effect(c)
 	-- Ruta 1: Red-Eyes + Flame Swordsman
 	local f1=Fusion.AddProcMix(c,true,true,CARD_REDEYES_B_DRAGON,45231177)[1]
 	f1:SetDescription(aux.Stringid(id,2))
-	-- Ruta 2: Red-Eyes + 2 Guerreros de FUEGO
+	-- Ruta 2: Red-Eyes + 2 monstruos FUEGO con nombre diferentes
 	local f2=Fusion.AddProcMixN(c,true,true,CARD_REDEYES_B_DRAGON,1,s.matfilter,2)[1]
 	f2:SetDescription(aux.Stringid(id,3))
 
@@ -56,8 +56,12 @@ end
 s.listed_names={CARD_REDEYES_B_DRAGON,45231177}
 s.material_setcode={0x3b}
 
-function s.matfilter(c,fc,sumtype,tp)
-	return c:IsAttribute(ATTRIBUTE_FIRE,fc,sumtype,tp) and c:IsRace(RACE_WARRIOR)
+function s.matfilter(c,fc,sumtype,tp,sub,mg,sg)
+	return c:IsAttribute(ATTRIBUTE_FIRE) and (not sg or not sg:IsExists(s.fusfilter,1,c,c:GetCode(fc,sumtype,tp),fc,tp))
+end
+
+function s.fusfilter(c,code,fc,tp)
+	return c:IsSummonCode(fc,SUMMON_TYPE_FUSION,tp,code) and not c:IsHasEffect(511002961) 
 end
 
 function s.splimit(e,se,sp,st)
